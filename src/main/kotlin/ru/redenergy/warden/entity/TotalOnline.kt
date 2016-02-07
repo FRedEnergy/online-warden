@@ -13,8 +13,8 @@ import java.sql.Timestamp
  * @param online - total number of players
  */
 @DatabaseTable(tableName = "total")
-class TotalOnline(@com.j256.ormlite.field.DatabaseField(generatedId = true) val id: Int = -1, @com.j256.ormlite.field.DatabaseField val time: Timestamp, @com.j256.ormlite.field.DatabaseField val online: Int){
+class TotalOnline(@com.j256.ormlite.field.DatabaseField(generatedId = true) val id: Int = -1, @com.j256.ormlite.field.DatabaseField val time: Long, @com.j256.ormlite.field.DatabaseField val online: Int){
 
     //for ormlite
-    constructor(): this(time = Timestamp(0), online = -1)
+    constructor(): this(time = 0, online = -1)
 }

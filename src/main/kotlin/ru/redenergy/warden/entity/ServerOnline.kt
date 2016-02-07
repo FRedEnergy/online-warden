@@ -13,8 +13,8 @@ import java.sql.Timestamp
  * @param online - server online
  */
 @DatabaseTable(tableName = "online")
-class ServerOnline(@com.j256.ormlite.field.DatabaseField(id = true) val id: String, @com.j256.ormlite.field.DatabaseField val lastUpdate: Timestamp, @com.j256.ormlite.field.DatabaseField val online: Int){
+class ServerOnline(@com.j256.ormlite.field.DatabaseField(id = true) val id: String, @com.j256.ormlite.field.DatabaseField val lastUpdate: Long, @com.j256.ormlite.field.DatabaseField val online: Int){
 
     //for ormlite
-    constructor(): this("", Timestamp(-1), -1)
+    constructor(): this("", -1, -1)
 }
