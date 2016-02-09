@@ -5,6 +5,7 @@ import ch.jamiete.mcping.MinecraftPingOptions
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.dao.DaoManager
 import com.j256.ormlite.jdbc.JdbcConnectionSource
@@ -57,12 +58,33 @@ class OnlineApplication {
     fun registerRoutes(){
         Spark.get("/online", {req, res ->
             val online = onlineDao.queryForAll()
+            val total = totalDao.queryForAll();
             jsonObject(
                 "servers" to gson.toJsonTree(online),
-                "total" to online.sumBy { it.online }
+                "total" to online.sumBy { it.online },
+                "totalToday" to totalWithin(TimeUnit.DAYS.toMillis(1)).map { it.online }.max(),
+                "totalMax" to total.map { it.online }.max()
             )
         })
+
+        Spark.get("/total/today", {res, req ->
+            buildTotalResponseWithin(TimeUnit.DAYS.toMillis(1)) //one day
+        })
+
+        Spark.get("/total/week", {res, req ->
+            buildTotalResponseWithin(TimeUnit.DAYS.toMillis(7)) //seven days or one week
+        })
+
+        Spark.get("/total/month", {res, req ->
+            buildTotalResponseWithin(TimeUnit.DAYS.toMillis(30)) //30 day or one month
+        })
     }
+
+    fun buildTotalResponseWithin(interval: Long): JsonObject =
+        jsonObject("records" to gson.toJsonTree(totalWithin(interval)))
+
+    fun totalWithin(interval: Long): List<TotalOnline> =
+            totalDao.queryBuilder().where().gt("time", System.currentTimeMillis() - interval).query()
 
 
 
