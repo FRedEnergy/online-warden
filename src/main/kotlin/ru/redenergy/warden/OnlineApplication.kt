@@ -4,8 +4,10 @@ import ch.jamiete.mcping.MinecraftPing
 import ch.jamiete.mcping.MinecraftPingOptions
 import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.toJson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import com.google.gson.JsonPrimitive
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.dao.DaoManager
 import com.j256.ormlite.jdbc.JdbcConnectionSource
@@ -20,6 +22,15 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class OnlineApplication {
+    val totalOnlineTodayQuery = """
+                                SELECT MAX(online) as TOTAL_TODAY
+                                FROM `total`
+                                WHERE `time` > UNIX_TIMESTAMP() - 86400000
+                                """
+    val totalOnlineMaxQuery =   """
+                                SELECT MAX(online) AS TOTAL_MAX
+                                FROM `total`
+                                """
 
     val gson = GsonBuilder().create()
     val connection = JdbcConnectionSource("jdbc:mysql://localhost:3306/test", "root", "mysql");
@@ -58,12 +69,13 @@ class OnlineApplication {
     fun registerRoutes(){
         Spark.get("/online", {req, res ->
             val online = onlineDao.queryForAll()
-            val total = totalDao.queryForAll();
+            val totalToday = totalDao.queryRaw(totalOnlineTodayQuery).results[0][0] ?: "-1"
+            val totalMax = totalDao.queryRaw(totalOnlineMaxQuery).results[0][0] ?: "-1"
             jsonObject(
                 "servers" to gson.toJsonTree(online),
                 "total" to online.sumBy { it.online },
-                "totalToday" to totalWithin(TimeUnit.DAYS.toMillis(1)).map { it.online }.max(),
-                "totalMax" to total.map { it.online }.max()
+                "totalToday" to totalToday.toJson(),
+                "totalMax" to totalMax.toJson()
             )
         })
 
