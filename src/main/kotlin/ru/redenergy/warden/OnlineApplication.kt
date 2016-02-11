@@ -2,12 +2,10 @@ package ru.redenergy.warden
 
 import ch.jamiete.mcping.MinecraftPing
 import ch.jamiete.mcping.MinecraftPingOptions
-import com.github.salomonbrys.kotson.jsonArray
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.dao.DaoManager
 import com.j256.ormlite.jdbc.JdbcConnectionSource
@@ -17,11 +15,10 @@ import ru.redenergy.warden.entity.ServerOnline
 import ru.redenergy.warden.entity.TotalOnline
 import spark.Spark
 import java.io.IOException
-import java.sql.Timestamp
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class OnlineApplication {
+class OnlineApplication(val jdbcPath: String, val jdbcLogin: String, val jdbcPass: String) {
     val totalOnlineTodayQuery = """
                                 SELECT MAX(online) as TOTAL_TODAY
                                 FROM `total`
@@ -33,7 +30,7 @@ class OnlineApplication {
                                 """
 
     val gson = GsonBuilder().create()
-    val connection = JdbcConnectionSource("jdbc:mysql://localhost:3306/test", "root", "mysql");
+    val connection = JdbcConnectionSource(jdbcPath, jdbcLogin, jdbcPass);
     val scheduler = Executors.newScheduledThreadPool(5)
     val servers = arrayListOf<Server>()
     val onlineDao = DaoManager.createDao<Dao<ServerOnline, String>, ServerOnline>(connection, ServerOnline::class.java)

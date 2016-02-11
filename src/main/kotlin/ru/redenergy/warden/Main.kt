@@ -8,6 +8,16 @@ import java.io.File
 import java.io.FileReader
 
 fun main(args: Array<String>){
+    var jdbcPath = "jdbc:mysql://localhost:3306/test"
+    var jdbcLogin = "root"
+    var jdbcPass = "mysql"
+    for((i, arg) in args.withIndex()){
+        when(arg){
+            "-path" -> jdbcPath = args[i + 1]
+            "-login" -> jdbcLogin = args[i + 1]
+            "-pass" -> jdbcPass = args[i + 1]
+        }
+    }
     val servers = Gson().fromJson<MutableList<Server>>(JsonReader(FileReader(File("servers.json"))))
-    OnlineApplication().launch(servers)
+    OnlineApplication(jdbcPath, jdbcLogin, jdbcPass).launch(servers)
 }
