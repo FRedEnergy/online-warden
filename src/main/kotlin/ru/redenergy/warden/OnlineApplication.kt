@@ -19,15 +19,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 class OnlineApplication(val jdbcPath: String, val jdbcLogin: String, val jdbcPass: String) {
-    val totalOnlineTodayQuery = """
-                                SELECT MAX(online) as TOTAL_TODAY
-                                FROM `total`
-                                WHERE `time` > UNIX_TIMESTAMP() - 86400000
-                                """
-    val totalOnlineMaxQuery =   """
-                                SELECT MAX(online) AS TOTAL_MAX
-                                FROM `total`
-                                """
 
     val gson = GsonBuilder().create()
     val connection = JdbcConnectionSource(jdbcPath, jdbcLogin, jdbcPass);
@@ -66,8 +57,11 @@ class OnlineApplication(val jdbcPath: String, val jdbcLogin: String, val jdbcPas
     fun registerRoutes(){
         Spark.get("/online", {req, res ->
             val online = onlineDao.queryForAll()
-            val totalToday = totalDao.queryRaw(totalOnlineTodayQuery).results[0][0] ?: "-1"
-            val totalMax = totalDao.queryRaw(totalOnlineMaxQuery).results[0][0] ?: "-1"
+            val totalToday = totalDao.queryBuilder()
+                            .selectRaw("MAX(online)").queryRaw().results[0][0] ?: "-1"
+            val totalMax = totalDao.queryBuilder()
+                            .selectRaw("MAX(online)")
+                            .where().raw("`time` > UNIX_TIMESTAMP() - 86400000").queryRaw().results[0][0] ?: "-1"
             jsonObject(
                 "servers" to gson.toJsonTree(online),
                 "total" to online.sumBy { it.online },
