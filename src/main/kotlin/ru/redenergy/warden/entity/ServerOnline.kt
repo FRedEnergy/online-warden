@@ -2,7 +2,6 @@ package ru.redenergy.warden.entity
 
 import com.j256.ormlite.field.DatabaseField as db
 import com.j256.ormlite.table.DatabaseTable
-import java.sql.Timestamp
 
 /**
  * Represents server online stored in database
@@ -13,7 +12,7 @@ import java.sql.Timestamp
  * @param online - server online
  */
 @DatabaseTable(tableName = "online")
-class ServerOnline(@com.j256.ormlite.field.DatabaseField(id = true) val id: String, @com.j256.ormlite.field.DatabaseField val lastUpdate: Long, @com.j256.ormlite.field.DatabaseField val online: Int){
+class ServerOnline(@db(id = true) val id: String, @db val lastUpdate: Long, @db val online: Int){
 
     //for ormlite
     constructor(): this("", -1, -1)
